@@ -3,6 +3,7 @@ import { ClipboardList, Upload, CheckCircle2, FileSpreadsheet, Award, Save, Hard
 import { useAcademic } from '../../context/AcademicContext';
 import SectionSaveFooter from '../../components/layout/SectionSaveFooter';
 import { getSurveyAttainment, saveSurveyAttainment, uploadSurveyFile } from '../../api/academic';
+import { getApiBaseUrl } from '../../api/client';
 import * as XLSX from 'xlsx';
 
 export default function CourseEndSurveyHub({ courseId, hideFooter = false }) {
@@ -315,7 +316,7 @@ export default function CourseEndSurveyHub({ courseId, hideFooter = false }) {
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <a
-                  href={`http://localhost:8080/api/v1/attainment/documents/${targetCourseId}/download/SURVEY`}
+                  href={`${getApiBaseUrl()}/attainment/documents/${targetCourseId}/download/SURVEY`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn-primary"
@@ -429,7 +430,7 @@ export default function CourseEndSurveyHub({ courseId, hideFooter = false }) {
 
             <div style={{ marginTop: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
               <a
-                href={`http://localhost:8080/api/v1/attainment/documents/${targetCourseId}/download/SURVEY`}
+                href={`${getApiBaseUrl()}/attainment/documents/${targetCourseId}/download/SURVEY`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-primary"

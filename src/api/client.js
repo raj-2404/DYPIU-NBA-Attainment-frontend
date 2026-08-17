@@ -22,9 +22,25 @@ const clearSessionData = () => {
   } catch (e) {}
 };
 
-// Base API Client configured for Spring Boot backend integration on localhost:8080 via Vite Proxy /api/v1
+export const getApiBaseUrl = () => {
+  if (typeof window !== 'undefined') {
+    const pathname = window.location.pathname || '';
+    if (pathname.startsWith('/nba')) {
+      return '/nba/api/v1';
+    }
+    if (pathname.startsWith('/obe')) {
+      return '/obe/api/v1';
+    }
+  }
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  return '/api/v1';
+};
+
+// Base API Client configured for Spring Boot backend integration
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
+  baseURL: getApiBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
@@ -33,6 +49,7 @@ const apiClient = axios.create({
 // Request Interceptor: Attach JWT Access Token if present
 apiClient.interceptors.request.use(
   (config) => {
+    config.baseURL = getApiBaseUrl();
     const token = getSessionData('accessToken') || getSessionData('authToken') || getSessionData('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -93,7 +110,7 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshResponse = await axios.post('/api/v1/auth/refresh-token', { refreshToken });
+        const refreshResponse = await axios.post(`${getApiBaseUrl()}/auth/refresh-token`, { refreshToken });
         const resData = refreshResponse.data?.data || refreshResponse.data;
 
         const newAccessToken = resData?.accessToken || resData?.token;
@@ -116,7 +133,12 @@ apiClient.interceptors.response.use(
       } catch (refreshErr) {
         processQueue(refreshErr, null);
         clearSessionData();
-        window.location.href = '/login';
+        const loginPath = (typeof window !== 'undefined' && window.location.pathname.startsWith('/nba'))
+          ? '/nba/login'
+          : (typeof window !== 'undefined' && window.location.pathname.startsWith('/obe'))
+          ? '/obe/login'
+          : '/login';
+        window.location.href = loginPath;
         return Promise.reject(refreshErr);
       } finally {
         isRefreshing = false;

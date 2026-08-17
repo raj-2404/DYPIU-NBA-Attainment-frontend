@@ -12,7 +12,7 @@ export * from './reportsApi';
 export * from './approvalApi';
 export * from './dashboardApi';
 
-import apiClient from './client';
+import apiClient, { getApiBaseUrl } from './client';
 
 import {
   getSchools,
@@ -116,21 +116,39 @@ export const saveCourse = (data) => (data?.id ? updateCourse(data.id, data) : cr
 export const deleteCourse = (courseId) => apiClient.delete(`/academic/courses/${courseId}`);
 
 export const getProgrammePOs = async (programmeId) => {
-  const res = await getProgrammeOutcomes(programmeId);
-  const list = res?.data?.pos || res?.pos || res?.data?.data?.pos || (Array.isArray(res?.data) ? res.data : []);
-  return { data: list, pos: list };
+  try {
+    const res = await apiClient.get(`/outcomes/programmes/${programmeId}/pos`);
+    const list = res?.data || res || [];
+    return { data: Array.isArray(list) ? list : (list.pos || []), pos: Array.isArray(list) ? list : (list.pos || []) };
+  } catch (err) {
+    const res = await getProgrammeOutcomes(programmeId);
+    const list = res?.data?.pos || res?.pos || res?.data?.data?.pos || (Array.isArray(res?.data) ? res.data : []);
+    return { data: list, pos: list };
+  }
 };
 
 export const getProgrammePSOs = async (programmeId) => {
-  const res = await getProgrammeOutcomes(programmeId);
-  const list = res?.data?.psos || res?.psos || res?.data?.data?.psos || (Array.isArray(res?.data) ? res.data : []);
-  return { data: list, psos: list };
+  try {
+    const res = await apiClient.get(`/outcomes/programmes/${programmeId}/psos`);
+    const list = res?.data || res || [];
+    return { data: Array.isArray(list) ? list : (list.psos || []), psos: Array.isArray(list) ? list : (list.psos || []) };
+  } catch (err) {
+    const res = await getProgrammeOutcomes(programmeId);
+    const list = res?.data?.psos || res?.psos || res?.data?.data?.psos || (Array.isArray(res?.data) ? res.data : []);
+    return { data: list, psos: list };
+  }
 };
 
 export const getProgrammePEOs = async (programmeId) => {
-  const res = await getProgrammeOutcomes(programmeId);
-  const list = res?.data?.peos || res?.peos || res?.data?.data?.peos || (Array.isArray(res?.data) ? res.data : []);
-  return { data: list, peos: list };
+  try {
+    const res = await apiClient.get(`/outcomes/programmes/${programmeId}/peos`);
+    const list = res?.data || res || [];
+    return { data: Array.isArray(list) ? list : (list.peos || []), peos: Array.isArray(list) ? list : (list.peos || []) };
+  } catch (err) {
+    const res = await getProgrammeOutcomes(programmeId);
+    const list = res?.data?.peos || res?.peos || res?.data?.data?.peos || (Array.isArray(res?.data) ? res.data : []);
+    return { data: list, peos: list };
+  }
 };
 
 // ── School & Department Setup Helpers ───────────────────────────────────────
@@ -221,14 +239,42 @@ export const saveProgramme = async (data) => {
 export const deleteProgramme = (programmeId) => apiClient.delete(`/academic/programmes/${programmeId}`);
 
 // ── Evidence & Attainment Upload Helpers ────────────────────────────────────
-export const getExaminationAttainment = (offeringId) => getCourseAttainment(offeringId);
-export const saveExaminationAttainment = (offeringId, data) => saveCourseOutcomes(offeringId, data);
-export const uploadExaminationFile = (offeringId, file, threshold) => uploadCourseMarks(offeringId, file, threshold);
-export const getUploadedDocuments = (offeringId) => apiClient.get(`/academic/course-offerings/${offeringId}/documents`);
+export const getExaminationAttainment = async (offeringId) => {
+  try {
+    const res = await apiClient.get(`/attainment/examination/${offeringId}`);
+    if (res) return res;
+  } catch (e) {
+    return getCourseAttainment(offeringId);
+  }
+};
+export const saveExaminationAttainment = (offeringId, data) => apiClient.post(`/attainment/examination/${offeringId}`, data);
+export const uploadExaminationFile = async (offeringId, file, threshold) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  if (threshold !== undefined && threshold !== null) formData.append('thresholdPercentage', threshold);
+  return apiClient.post(`/attainment/examination/${offeringId}/upload`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+export const getUploadedDocuments = (offeringId) => apiClient.get(`/attainment/documents/${offeringId}`);
 
-export const getSurveyAttainment = (offeringId) => getCourseAttainment(offeringId);
-export const saveSurveyAttainment = (offeringId, data) => saveCourseOutcomes(offeringId, data);
-export const uploadSurveyFile = (offeringId, file) => uploadCourseSurvey(offeringId, file);
+export const getSurveyAttainment = async (offeringId) => {
+  try {
+    const res = await apiClient.get(`/attainment/survey/${offeringId}`);
+    if (res) return res;
+  } catch (e) {
+    return getCourseAttainment(offeringId);
+  }
+};
+export const saveSurveyAttainment = (offeringId, data) => apiClient.post(`/attainment/survey/${offeringId}`, data);
+export const uploadSurveyFile = async (offeringId, file, threshold) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  if (threshold !== undefined && threshold !== null) formData.append('thresholdPercentage', threshold);
+  return apiClient.post(`/attainment/survey/${offeringId}/upload`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
 
 // ── Batch & Student Helpers ────────────────────────────────────────────────
 export const saveBatch = (data) => (data?.id ? updateBatch(data.id, data) : createBatch(data));
@@ -243,9 +289,18 @@ export const saveProgrammeCoordinator = (progId, coordId) => {
   console.log('[academicApi] saveProgrammeCoordinator called | progId:', progId, '| payload:', payload);
   return apiClient.put(`/academic/programmes/${progId}/coordinator`, payload);
 };
-export const saveProgrammePOs = (progId, pos) => saveProgrammeOutcomes(progId, { pos });
-export const saveProgrammePSOs = (progId, psos) => saveProgrammeOutcomes(progId, { psos });
-export const saveProgrammePEOs = (progId, peos) => saveProgrammeOutcomes(progId, { peos });
+export const saveProgrammePOs = (progId, pos) => {
+  const payload = Array.isArray(pos) ? pos : (pos?.pos || []);
+  return apiClient.post(`/outcomes/programmes/${progId}/pos`, payload);
+};
+export const saveProgrammePSOs = (progId, psos) => {
+  const payload = Array.isArray(psos) ? psos : (psos?.psos || []);
+  return apiClient.post(`/outcomes/programmes/${progId}/psos`, payload);
+};
+export const saveProgrammePEOs = (progId, peos) => {
+  const payload = Array.isArray(peos) ? peos : (peos?.peos || []);
+  return apiClient.post(`/outcomes/programmes/${progId}/peos`, payload);
+};
 export const saveProgrammeTargetLevels = (progId, data) => saveProgrammeTargets(progId, data);
 export const getProgrammeTargetLevels = (progId) => getProgrammeTargets(progId);
 
@@ -349,14 +404,16 @@ export const updateCourseCoordinatorSetupProgress = (arg1, arg2, arg3) => {
 export const completeCourseCoordinatorSetup = (identifier, email) => updateRoleSetupProgress('COURSE_COORDINATOR', identifier || email || '', 6);
 
 // ── Export Download Helpers ─────────────────────────────────────────────────
-export const downloadAttainmentExcel = (courseOfferingId, batchId) => {
-  const url = `/api/v1/reports/course-atr/${courseOfferingId}/export-data?format=excel`;
+export const downloadAttainmentExcel = (courseOfferingOrCourseId, batchId) => {
+  const query = batchId ? `?batchId=${encodeURIComponent(batchId)}` : '';
+  const url = `${getApiBaseUrl()}/attainment/export/excel/${encodeURIComponent(courseOfferingOrCourseId)}${query}`;
   window.open(url, '_blank');
   return Promise.resolve();
 };
 
-export const downloadAttainmentPdf = (courseOfferingId, batchId) => {
-  const url = `/api/v1/reports/course-atr/${courseOfferingId}/export-data?format=pdf`;
+export const downloadAttainmentPdf = (courseOfferingOrCourseId, batchId) => {
+  const query = batchId ? `?batchId=${encodeURIComponent(batchId)}` : '';
+  const url = `${getApiBaseUrl()}/attainment/export/pdf/${encodeURIComponent(courseOfferingOrCourseId)}${query}`;
   window.open(url, '_blank');
   return Promise.resolve();
 };

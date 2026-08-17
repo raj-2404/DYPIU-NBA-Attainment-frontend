@@ -543,43 +543,6 @@ export default function Login() {
                       Register Account
                     </button>
                   </div>
-
-                  {/* Quick Offline Preview Mode when backend APIs are offline */}
-                  <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.18)", textAlign: "center" }}>
-                    <div style={{ fontSize: 11, fontWeight: "800", textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(255,255,255,0.7)", marginBottom: 8 }}>
-                      Offline UI Preview (Explore Portals)
-                    </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 6 }}>
-                      <button
-                        type="button"
-                        onClick={() => storeSessionAndNavigate({ id: "preview-cc", name: "Course Coordinator (Preview)", email: "cc@dypiu.ac.in", role: "COURSE_COORDINATOR" }, "preview-token", "preview-refresh")}
-                        style={{ padding: "7px 10px", fontSize: "11.5px", fontWeight: "700", borderRadius: 6, background: "rgba(255,255,255,0.15)", color: "#ffffff", border: "1px solid rgba(255,255,255,0.25)", cursor: "pointer" }}
-                      >
-                        Course Coordinator
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => storeSessionAndNavigate({ id: "preview-pc", name: "Programme Coordinator (Preview)", email: "pc@dypiu.ac.in", role: "PROGRAMME_COORDINATOR" }, "preview-token", "preview-refresh")}
-                        style={{ padding: "7px 10px", fontSize: "11.5px", fontWeight: "700", borderRadius: 6, background: "rgba(255,255,255,0.15)", color: "#ffffff", border: "1px solid rgba(255,255,255,0.25)", cursor: "pointer" }}
-                      >
-                        Prog. Coordinator
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => storeSessionAndNavigate({ id: "preview-hod", name: "Head of Department (Preview)", email: "hod@dypiu.ac.in", role: "HOD" }, "preview-token", "preview-refresh")}
-                        style={{ padding: "7px 10px", fontSize: "11.5px", fontWeight: "700", borderRadius: 6, background: "rgba(255,255,255,0.15)", color: "#ffffff", border: "1px solid rgba(255,255,255,0.25)", cursor: "pointer" }}
-                      >
-                        HOD Portal
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => storeSessionAndNavigate({ id: "preview-director", name: "Director / Dean (Preview)", email: "director@dypiu.ac.in", role: "DIRECTOR" }, "preview-token", "preview-refresh")}
-                        style={{ padding: "7px 10px", fontSize: "11.5px", fontWeight: "700", borderRadius: 6, background: "rgba(255,255,255,0.15)", color: "#ffffff", border: "1px solid rgba(255,255,255,0.25)", cursor: "pointer" }}
-                      >
-                        Director Portal
-                      </button>
-                    </div>
-                  </div>
                 </>
               ) : (
                 /* REGISTER FORM */
