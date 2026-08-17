@@ -48,6 +48,7 @@ const apiClient = axios.create({
 // Request Interceptor: Attach JWT Access Token if present
 apiClient.interceptors.request.use(
   (config) => {
+    config.baseURL = getApiBaseUrl();
     const token = getSessionData('accessToken') || getSessionData('authToken') || getSessionData('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
