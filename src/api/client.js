@@ -23,16 +23,17 @@ const clearSessionData = () => {
 };
 
 export const getApiBaseUrl = () => {
-  if (import.meta.env.VITE_API_BASE_URL) {
-    return import.meta.env.VITE_API_BASE_URL;
-  }
   if (typeof window !== 'undefined') {
-    if (window.location.pathname.startsWith('/nba')) {
+    const pathname = window.location.pathname || '';
+    if (pathname.startsWith('/nba')) {
       return '/nba/api/v1';
     }
-    if (window.location.pathname.startsWith('/obe')) {
+    if (pathname.startsWith('/obe')) {
       return '/obe/api/v1';
     }
+  }
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
   }
   return '/api/v1';
 };

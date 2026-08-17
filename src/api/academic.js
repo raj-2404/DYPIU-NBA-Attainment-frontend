@@ -12,7 +12,7 @@ export * from './reportsApi';
 export * from './approvalApi';
 export * from './dashboardApi';
 
-import apiClient from './client';
+import apiClient, { getApiBaseUrl } from './client';
 
 import {
   getSchools,
@@ -406,14 +406,14 @@ export const completeCourseCoordinatorSetup = (identifier, email) => updateRoleS
 // ── Export Download Helpers ─────────────────────────────────────────────────
 export const downloadAttainmentExcel = (courseOfferingOrCourseId, batchId) => {
   const query = batchId ? `?batchId=${encodeURIComponent(batchId)}` : '';
-  const url = `/api/v1/attainment/export/excel/${encodeURIComponent(courseOfferingOrCourseId)}${query}`;
+  const url = `${getApiBaseUrl()}/attainment/export/excel/${encodeURIComponent(courseOfferingOrCourseId)}${query}`;
   window.open(url, '_blank');
   return Promise.resolve();
 };
 
 export const downloadAttainmentPdf = (courseOfferingOrCourseId, batchId) => {
   const query = batchId ? `?batchId=${encodeURIComponent(batchId)}` : '';
-  const url = `/api/v1/attainment/export/pdf/${encodeURIComponent(courseOfferingOrCourseId)}${query}`;
+  const url = `${getApiBaseUrl()}/attainment/export/pdf/${encodeURIComponent(courseOfferingOrCourseId)}${query}`;
   window.open(url, '_blank');
   return Promise.resolve();
 };
